@@ -1,0 +1,338 @@
+### Criando uma View ###
+  adonis make:view nome_da_view
+  -> será criada um arquivo novo no diretório resouces/views/nome_da_view.edge
+
+### Criando uma nova rota
+  -> alterar o arquivo start/routes.js para conter a nova rota
+     para o nosso caso a rota inicial será a home
+    # start/routes.js
+
+    Route.on('/').render('home')
+
+### criando um controller com o método index
+
+  adonis make:controller TaskController
+    --> opcão http, e ele criará um arquivo controller app/Controllers/Http/TaskController.js
+    Neste momento, poderemos criar o método index na controller
+      # app/Controllers/Http/TaskController.js
+
+        'use strict'
+
+        class TaskController {
+          index () {
+            return 'Task'
+          }
+        }
+
+        module.exports = TaskController
+
+    --> basta agora criar no arquivo de rotas a rota pra aquele controller
+
+### Conectando um Controller a uma View
+  adonis make:view task
+  --> assim é criada a view em resource/views/task.edge
+  --> para conectar a controller a view é necessário configurar no método da controller a view a ser usada
+
+      class TaskController {
+      index ( { view }) {
+        return view.render('task')
+      }
+    }
+
+  --> poderemos passar parâmetros pra esta view da seguinte forma
+
+      class TaskController {
+        index ( { view }) {
+          return view.render('task', {
+            title: 'Your tasks'
+          })
+        }
+      }
+    ---> e no arquivo de view
+    # resource/views/task.edge
+      <h1> {{ title }} </h1>
+
+  --> enviando um array para a view
+    ---> configuramos a controller para enviar o array tasks
+      class TaskController {
+        index ( { view }) {
+          const tasks = [
+            { title: 'Task one',
+              body: 'This is task one'
+            },
+            { title: 'Task two',
+              body: 'This is task two'
+            }
+          ]
+          return view.render('task', {
+            title: 'Your tasks',
+            tasks: tasks
+          })
+        }
+      }
+    ---> na view ficaria
+      # resource/views/task.edge 
+      <h1> {{ title }} </h1>
+      <ul>
+        @each(item in tasks)
+          <li> {{ item.title }} </li>
+        @endeach
+      </ul>
+### Pagina Main e inclusão do bootstrap
+  --> criado página resource/views/main.edge
+    adonis make:view Main
+  --> Alterar a rota para página inicial ser a main
+    # start/route.js
+    Route.on('/').render('main')
+
+  --> incluindo e testando o bootstrap (estilo e scripts )
+  # resources/main.edge
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Adonis todolist</title>
+      {{ style('https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css') }}
+    </head>
+    <body>
+
+      <div class="alert alert-primary" role="alert">
+        A simple primary alert—check it out!
+      </div>
+
+      {{ script('https://code.jquery.com/jquery-3.5.1.slim.min.js') }}
+      {{ script('https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js') }}
+      {{ script('https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js') }}
+    </body>
+    </html>
+
+  --> Criando a estrura de layout(template) para as páginas
+    --> Voltamos a alterar a rota para a apontar para página home
+      # start/route.js
+      Route.on('/').render('home')
+
+    --> Alteramos o código da página main(template) para conter as estruturas
+      # resources/main.edge
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Adonis todolist</title>
+        {{ style('https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css') }}
+      </head>
+      <body>
+
+        <div class="container">
+          @!section('content')
+        </div>
+
+        {{ script('https://code.jquery.com/jquery-3.5.1.slim.min.js') }}
+        {{ script('https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js') }}
+        {{ script('https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js') }}
+      </body>
+      </html> 
+
+    --> na página home chamamos o template (main)
+      # resources/home.edge
+      @layout('main')
+      @section('content')
+        <h1>Home</h1>
+      @endsection
+
+### Criando um include para ser utilizado como navbar no layout padrão
+  --> criamos uma nova view no diretório inc para a navbar
+    adonis make:view inc/navbar
+    ---> será criado # resources/view/inc/nav.edge
+  --> Incluimos códigos de uma navbar sugerida pelo bootstrap nesta página e configuramos as rotas dos links. Foi adicionada uma rota nova pra /add ('New Tasks)
+    
+    #resources/view/inc/nav.edge
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <a class="navbar-brand" href="#">Todo List</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">New Tasks</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+### criando uma tabela de DB
+  --> instalar o pacote de acesso ao banco de dados postgres
+  npm install pg
+  -> verificar o arquivo de configuracoa .env para definir os parâmetros da conexao ao DB
+    # .env
+    HOST=127.0.0.1
+    PORT=3333
+    NODE_ENV=development
+    APP_URL=http://${HOST}:${PORT}
+    CACHE_VIEWS=false
+    APP_KEY=en9bv79qPcZHJH1vVgYXm43Ll0Z3gpVZ
+    DB_CONNECTION=pg
+    DB_HOST=127.0.0.1
+    DB_PORT=5432
+    DB_USER=postgres
+    DB_PASSWORD=bela1010
+    DB_DATABASE=todolist
+    SESSION_DRIVER=cookie
+    HASH_DRIVER=bcrypt
+
+  --> criar uma migration
+    adonis make:migration task
+    --> foi criada a migration em database/migrations/xxx_task_schema.js. Teremos q acrescetar os campos necessários. como por exemplo, os campos title e body
+    'use strict'
+      # database/migrations/xxx_task_schema.js
+      /** @type {import('@adonisjs/lucid/src/Schema')} */
+      const Schema = use('Schema')
+
+      class TaskSchema extends Schema {
+        up () {
+          this.create('tasks', (table) => {
+            table.increments()
+            table.string('title')  <== criado
+            table.string('body')   <== criado
+            table.timestamps()
+          })
+        }
+
+        down () {
+          this.drop('tasks')
+        }
+      }
+
+      module.exports = TaskSchema
+
+    --> rodamos a migration
+      adonis migration:run
+
+    --> Criamos o model no adonis
+      adonis make:model Task 
+      --> foi criado o Model Task em app/Models/Task.js
+
+  --> Para ter acesso a DB Task, devemos configrar o acesso a ela na controller, alterando o método index e criado a consulta
+        # App/Controllers/Http/TaskController
+        'use strict'
+        const Task = use('App/Models/Task')   <== conexao com o model
+
+        class TaskController {
+
+          async index ( { view }) {     <== método index com consulta assincrona
+            const tasks = await Task.all()   <== A consulta ao BD
+            return view.render('tasks', {
+              title: 'Latast tasks',
+              tasks: tasks.toJSON()   <== convertendo os dados pra formato json
+            })
+          }
+        }
+
+        module.exports = TaskController
+
+### Criando um novo registro no BD
+  --> Criar o método store na controller Task para inclusão de novos registros
+    # App/Controllers/Http/TaskController
+    # ....
+
+    async store({ request, response, session }) {
+    const task = new Task()
+
+    task.title = request.input('title')
+    task.body = request.input('body')
+
+    await task.save()
+
+    return response.redirect('/tasks')
+
+    }
+
+  --> criar a view add onde os dados serão digitados
+
+    adonis make:view add
+
+    --> Dai elaboramos a tela de entrada de dados do modelo Task. Nele devemos incluir proteção CSRF ( csrfField()) contra falsificação de acesso, impedindo
+    indesejáveis as páginas de POST, PUT e DELETE
+
+    # resources/views/add.edge
+    #
+    @layout('main')
+    @section('content')
+      <h1 class="md-3">New Task</h1>
+      <form action="{{ route('/add') }}" method="post">
+        {{ csrfField() }}
+        <div class="md-3">
+          <label for="">Title</label>
+          <input type="text" class="form-control is-invalid"
+          name="title" placeholder="Your Title" value="">
+          <div class="invalid-feedback">
+            error!
+          </div>
+        </div>
+        <div class="md-3">
+          <label for="">Title</label>
+          <textarea name="body" id="" cclass="form-control is-invalid"
+          placeholder="body"
+          ></textarea>
+          <div class="invalid-feedback">
+            error!
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" type="submit">New Task</button>
+      </form>
+    @endsection
+
+    --> Devemos adicionar a rota a ser acessada pela TaskController
+    # start/routes.js
+
+    ## ...
+    Route.on('/add').render('add')
+    Route.post('/add', 'TaskController.store')
+
+    --> Para exibirmos notificações precisaremos utilizar a session da controller. Assim, colocamos na TaskController a informação
+      --> na TaskController 
+
+      # App/Controllers/Http/TaskController
+      # ....
+
+      async store({ request, response, session }) {
+        const task = new Task()
+
+        task.title = request.input('title')
+        task.body = request.input('body')
+
+        await task.save()
+        session.flash({ notification: 'Task added!' }) <== incluindo mensagem de sessão
+
+        return response.redirect('/tasks')
+
+      }
+
+    --> agora na view /task adicionamos
+      # resources/views/tasks.edge
+      # ...
+      @if(old('notification'))
+        <div class="alert alert-primary" role="alert">
+          {{ old('notification') }}
+        </div>  
+      @endif
+      # ...
+  
+
+
+
+
+
+
+
+
+
+

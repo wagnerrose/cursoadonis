@@ -5,20 +5,16 @@
     {{ csrfField() }}
     <div class="md-3">
       <label for="">Title</label>
-      <input type="text" class="form-control is-invalid"
-      name="title" placeholder="Your Title" value="">
-      <div class="invalid-feedback">
-        error!
-      </div>
+    <input type="text" class="form-control {{ hasErrorFor('title') ? 'is-invalid' : '' }}"
+      name="title" placeholder="Your Title" value="{{ old('title', '') }}">
+      {{ elIf('<div class="invalid-feedback">$self</div>', getErrorFor('title'), hasErrorFor('title')) }}
     </div>
     <div class="md-3">
-      <label for="">Title</label>
-      <textarea name="body" id="" cclass="form-control is-invalid"
-      placeholder="body"
+      <label for="">Body</label>
+      <textarea name="body" id="" class="form-control {{ hasErrorFor('body') ? 'is-invalid' : '' }}"
+      placeholder="body" 
       ></textarea>
-      <div class="invalid-feedback">
-        error!
-      </div>
+      {{ elIf('<div class="invalid-feedback">$self</div>', getErrorFor('body'), hasErrorFor('body')) }}
     </div>
     
     <button class="btn btn-primary" type="submit">New Task</button>

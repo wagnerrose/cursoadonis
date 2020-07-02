@@ -170,9 +170,9 @@
 ### criando uma tabela de DB
   --> instalar o pacote de acesso ao banco de dados postgres
   npm install pg
-  -> verificar o arquivo de configuracoa .env para definir os parâmetros da conexao ao DB
+  -> verificar o arquivo de configuração .env para definir os parâmetros da conexao ao DB
     # .env
-    HOST=127.0.0.1
+    HOST=0.0.0.0
     PORT=3333
     NODE_ENV=development
     APP_URL=http://${HOST}:${PORT}
@@ -326,6 +326,22 @@
       @endif
       # ...
   
+
+  #### Validação de Dados 
+  ## Quando desejamos validar os dados de um model, o Adonis oferece um validador. 
+  ## Como ele não vem instalado, deveremos configura-lo antes do uso. Para isso.
+  --> Execute:
+      adonis install @adonisjs/validator
+
+  --> Após registre o validador no arquivo start/app.js
+      # start/app.js
+      # ...
+      const providers = [
+        '@adonisjs/validator/providers/ValidatorProvider'
+      ]
+
+
+
 
 
 
